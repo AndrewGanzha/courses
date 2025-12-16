@@ -36,3 +36,48 @@ npm run dev
 ```sh
 npm run build
 ```
+
+## Работа с бекендом
+
+В `src/api` добавлен общий слой для запросов к Laravel-бекенду.
+
+- `src/api/httpClient.js` — низкоуровневый клиент (fetch, заголовки, токен, обработка ошибок).
+- `src/api/backend.js` — готовые методы под эндпоинты: Telegram-авторизация, dev login, профайл, курсы, уроки, платежи.
+- `src/api/index.js` — единый экспорт для импорта в компоненты/Pinia.
+
+### Настройки
+- Базовый URL берётся из `VITE_API_BASE_URL` (по умолчанию `http://localhost:8000/api`). Добавьте в `.env` при необходимости.
+- Токен хранится в `localStorage` под ключом `auth_token`.
+
+### Быстрый пример
+
+```js
+import { authWithTelegram, fetchMe, fetchCourses, createCoursePayment, logout } from './api';
+
+await authWithTelegram(initDataFromTelegram); // токен сохранится автоматически
+const me = await fetchMe();
+const courses = await fetchCourses();
+const payment = await createCoursePayment(courses[0].id);
+logout(); // удалить токен при выходе
+```
+
+### Доступные методы
+- `authWithTelegram(initData)` — POST `/auth/telegram`, сохраняет токен.
+- `devLogin()` — POST `/dev/login`, сохраняет токен (для локалки).
+- `logout()` — удаляет токен.
+- `fetchMe()` — GET `/me`.
+- `fetchCourses()` — GET `/courses`.
+- `fetchCourseById(id)` — GET `/courses/{id}`.
+- `fetchMyCourses()` — GET `/my/courses`.
+- `fetchLessonVideo(lessonId)` — GET `/lessons/{id}/video`.
+- `createCoursePayment(courseId)` — POST `/payments/course`.
+- Низкоуровневый объект `http` (`get/post/put/patch/delete`) для редких кастомных запросов.
+
+## Экран приложения (App.vue)
+- Повторяет логику `miniapp.html`, но с реальными запросами из `src/api`.
+- Блок авторизации (dev login / Telegram), список курсов, детали курса, уроки, ссылка на оплату, мои курсы, просмотр видео урока.
+- Состояния и ошибки подсвечиваются в шапке.
+
+### Моки
+- Для всех запросов, кроме авторизации, есть мок-ответы (см. `src/api/mocks.js`).
+- Включение: `VITE_USE_MOCKS=true` (автоподмена данных, но авторизация остаётся реальной).

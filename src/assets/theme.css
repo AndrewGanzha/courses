@@ -1,0 +1,25 @@
+:root {
+  /* Palette pulled from the provided reference artwork */
+  --color-bg-900: #05030b;
+  --color-bg-800: #0b0617;
+  --color-surface: #120c25;
+  --color-surface-strong: #1c1236;
+  --color-accent: #9d5cff;
+  --color-accent-bright: #cdbaff;
+  --color-text-primary: #e7dfff;
+  --color-text-secondary: #8e829c;
+  --color-glow: rgba(157, 92, 255, 0.45);
+  --gradient-bg: radial-gradient(120% 120% at 20% 15%, #1c0f33 0%, #070513 45%, #04030b 100%);
+  --gradient-stroke: linear-gradient(90deg, #9d5cff 0%, #7440d4 50%, #cdbaff 100%);
+}
+
+body {
+  background: var(--gradient-bg);
+  color: var(--color-text-primary);
+  font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--color-accent);
+}

@@ -8,7 +8,7 @@ const store = useAppStore();
 const router = useRouter();
 
 const displayCourses = computed(() => (store.state.courses || []).slice(0, 6));
-const courseImage = (course) => placeholderImage;
+const courseImage = (course) => course?.image_url || course?.image || placeholderImage;
 
 const openCourse = (id) => router.push(`/courses/${id}`);
 
@@ -37,9 +37,8 @@ onMounted(async () => {
         @click="openCourse(course.id)"
       >
         <div class="catalog-card__top">
-          <div class="catalog-card__glass-icon" aria-hidden="true">🏆</div>
-          <div class="catalog-card__logo">
-            <img :src="courseImage(course)" alt="" loading="lazy" />
+          <div class="catalog-card__icon-shell">
+            <img :src="courseImage(course)" :alt="course.title" loading="lazy" />
           </div>
         </div>
         <div class="catalog-card__bottom">
@@ -56,17 +55,29 @@ onMounted(async () => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 12px;
+  width: 100%;
+  justify-items: stretch;
+  align-items: stretch;
 }
 
 .catalog-card {
   position: relative;
   aspect-ratio: 1 / 1;
+  width: 100%;
+  height: 100%;
+  justify-self: stretch;
+  align-self: stretch;
   border-radius: 18px;
   cursor: pointer;
   overflow: hidden;
-  border: 1px solid rgba(205, 186, 255, 0.18);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(18, 12, 37, 0.88));
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(205, 186, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -18px 26px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   transition: 0.25s ease;
   display: grid;
   grid-template-rows: 1fr auto;
@@ -83,12 +94,10 @@ onMounted(async () => {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 0% 0%, rgba(0, 0, 0, 0.45), transparent 55%),
-    radial-gradient(circle at 100% 0%, rgba(0, 0, 0, 0.4), transparent 55%),
-    radial-gradient(circle at 0% 100%, rgba(0, 0, 0, 0.35), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(0, 0, 0, 0.5), transparent 55%);
-  mix-blend-mode: multiply;
-  opacity: 0.95;
+    linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06) 45%, rgba(0, 0, 0, 0.14)),
+    radial-gradient(circle at 25% 15%, rgba(255, 255, 255, 0.22), transparent 55%),
+    radial-gradient(circle at 85% 80%, rgba(0, 0, 0, 0.26), transparent 55%);
+  opacity: 0.9;
 }
 
 .catalog-card::before {
@@ -98,10 +107,10 @@ onMounted(async () => {
   right: 0;
   width: 46px;
   height: 46px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.08));
   clip-path: polygon(0 0, 100% 0, 100% 100%);
-  box-shadow: -10px 12px 16px rgba(0, 0, 0, 0.32);
-  opacity: 0.7;
+  box-shadow: -10px 12px 18px rgba(0, 0, 0, 0.34);
+  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -110,50 +119,52 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px;
+  padding: 18px 14px 10px;
 }
 
-.catalog-card__logo {
-  width: 100%;
-  height: 100%;
-  border-radius: 14px;
-  background: #ffffff;
+.catalog-card__icon-shell {
+  position: relative;
+  width: 72%;
+  max-width: 160px;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.25),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 18px 34px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -18px 26px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.catalog-card__logo img {
-  width: 88%;
-  height: 88%;
-  object-fit: cover;
-}
-
-.catalog-card__glass-icon {
+.catalog-card__icon-shell::after {
+  content: "";
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 16px;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 55%);
+  opacity: 0.9;
+}
+
+.catalog-card__icon-shell img {
+  position: relative;
+  z-index: 1;
+  width: 74%;
+  height: 74%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.22));
 }
 
 .catalog-card__bottom {
   position: relative;
-  padding: 12px 12px 14px;
+  padding: 12px 12px 16px;
+  text-align: center;
 }
 
 .catalog-card__bottom::before {
@@ -174,7 +185,7 @@ onMounted(async () => {
 .catalog-card__title {
   position: relative;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.2;
   color: var(--color-text-primary);
   text-shadow: 0 10px 20px rgba(0, 0, 0, 0.42);
@@ -186,7 +197,7 @@ onMounted(async () => {
   }
 
   .catalog-card__title {
-    font-size: 15px;
+    font-size: 16px;
   }
 }
 </style>

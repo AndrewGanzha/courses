@@ -491,12 +491,38 @@ nav {
   }
 
   header {
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .user-actions {
+    flex: 0 0 auto;
   }
 
   nav {
-    width: 100%;
+    width: auto;
+    flex: 1 1 auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    white-space: nowrap;
+    padding: 7px 10px;
+    font-size: 14px;
+    border-radius: 11px;
+  }
+
+  .user-pill {
+    padding: 7px 10px;
+    border-radius: 11px;
+    font-size: 14px;
   }
 }
 </style>

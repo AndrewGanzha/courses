@@ -73,7 +73,7 @@ export const useAppStore = defineStore('app', () => {
     run('auth', async () => {
       const res = await devLogin();
       setToken(res?.token || getAuthToken());
-      state.status = 'Авторизован (dev)';
+      state.status = 'Авторизован';
       await loadProfile();
       await loadCourses();
     });

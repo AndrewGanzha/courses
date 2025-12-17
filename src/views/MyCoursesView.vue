@@ -28,9 +28,8 @@ onMounted(async () => {
       >
         <div class="course-head">
           <div class="course-title">{{ course.title }}</div>
-          <span class="pill pill-green">Доступ открыт</span>
+          <span class="pill pill-green text-center">Доступ открыт</span>
         </div>
-        <div class="course-desc">Приобретен: {{ course.purchased_at || '—' }}</div>
       </div>
     </div>
     <div class="controls">

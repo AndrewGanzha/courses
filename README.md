@@ -42,7 +42,7 @@ npm run build
 В `src/api` добавлен общий слой для запросов к Laravel-бекенду.
 
 - `src/api/httpClient.js` — низкоуровневый клиент (fetch, заголовки, токен, обработка ошибок).
-- `src/api/backend.js` — готовые методы под эндпоинты: Telegram-авторизация, dev login, профайл, курсы, уроки, платежи.
+- `src/api/backend.js` — готовые методы под эндпоинты: Telegram-авторизация, dev login, профайл, проекты, курсы проекта, уроки, платежи.
 - `src/api/index.js` — единый экспорт для импорта в компоненты/Pinia.
 
 ### Настройки
@@ -52,11 +52,19 @@ npm run build
 ### Быстрый пример
 
 ```js
-import { authWithTelegram, fetchMe, fetchCourses, createCoursePayment, logout } from './api';
+import {
+  authWithTelegram,
+  fetchMe,
+  fetchProjects,
+  fetchProjectCourses,
+  createCoursePayment,
+  logout,
+} from './api';
 
 await authWithTelegram(initDataFromTelegram); // токен сохранится автоматически
 const me = await fetchMe();
-const courses = await fetchCourses();
+const projects = await fetchProjects();
+const courses = await fetchProjectCourses(projects[0].id);
 const payment = await createCoursePayment(courses[0].id);
 logout(); // удалить токен при выходе
 ```
@@ -66,17 +74,18 @@ logout(); // удалить токен при выходе
 - `devLogin()` — POST `/dev/login`, сохраняет токен (для локалки).
 - `logout()` — удаляет токен.
 - `fetchMe()` — GET `/me`.
-- `fetchCourses()` — GET `/courses`.
-- `fetchCourseById(id)` — GET `/courses/{id}`.
+- `fetchProjects()` — GET `/projects` (публично).
+- `fetchProjectCourses(projectId)` — GET `/projects/{project}/courses`.
+- `fetchCourseById(projectId, id)` — GET `/projects/{project}/courses/{id}`.
+- `fetchCourses()` — GET `/courses` (все курсы, под авторизацией).
 - `fetchMyCourses()` — GET `/my/courses`.
 - `fetchLessonVideo(lessonId)` — GET `/lessons/{id}/video`.
 - `createCoursePayment(courseId)` — POST `/payments/course`.
 - Низкоуровневый объект `http` (`get/post/put/patch/delete`) для редких кастомных запросов.
 
 ## Экран приложения (App.vue)
-- Повторяет логику `miniapp.html`, но с реальными запросами из `src/api`.
-- Блок авторизации (dev login / Telegram), список курсов, детали курса, уроки, ссылка на оплату, мои курсы, просмотр видео урока.
-- Состояния и ошибки подсвечиваются в шапке.
+- Главная — список проектов, внутри проекта — курсы, детальная страница курса с уроками и оплатой, «Мои курсы», просмотр видео урока.
+- Авторизация через модальное окно (dev login / Telegram из кода), статус и ошибки выводятся в шапке.
 
 ### Моки
 - Для всех запросов, кроме авторизации, есть мок-ответы (см. `src/api/mocks.js`).

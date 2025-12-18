@@ -7,18 +7,20 @@ const store = useAppStore();
 const route = useRoute();
 const router = useRouter();
 
-const courseId = computed(() => route.params.id);
+const projectId = computed(() => route.params.projectId);
+const courseId = computed(() => route.params.courseId);
 const lessonId = computed(() => route.params.lessonId);
 
 const loadLesson = async () => {
-  if (!courseId.value || !lessonId.value) return;
-  await store.openLesson(courseId.value, lessonId.value);
+  if (!projectId.value || !courseId.value || !lessonId.value) return;
+  await store.openLesson(projectId.value, courseId.value, lessonId.value);
 };
 
-const backToCourse = () => router.push(`/courses/${courseId.value}`);
+const backToCourse = () =>
+  router.push(`/projects/${projectId.value}/courses/${courseId.value}`);
 
 onMounted(loadLesson);
-watch([courseId, lessonId], loadLesson);
+watch([projectId, courseId, lessonId], loadLesson);
 </script>
 
 <template>

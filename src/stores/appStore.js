@@ -11,6 +11,8 @@ import {
   fetchLessonVideo,
   fetchMe,
   fetchMyCourses,
+  fetchProjectCourses,
+  fetchProjects,
   getAuthToken,
   logout,
 } from '../api';
@@ -23,7 +25,9 @@ export const useAppStore = defineStore('app', () => {
 
     token: getAuthToken(),
     user: null,
+    projects: [],
     courses: [],
+    projectCourses: {},
     courseDetails: null,
     myCourses: [],
 
@@ -60,12 +64,12 @@ export const useAppStore = defineStore('app', () => {
   };
 
   const init = async () => {
+    await loadProjects();
     if (state.token) {
       await loadProfile();
-    }
-
-    if (useMocks || state.token) {
-      await loadCourses();
+      await loadAllCourses();
+    } else if (useMocks) {
+      await loadAllCourses();
     }
   };
 
@@ -75,7 +79,7 @@ export const useAppStore = defineStore('app', () => {
       setToken(res?.token || getAuthToken());
       state.status = 'Авторизован';
       await loadProfile();
-      await loadCourses();
+      await loadAllCourses();
     });
 
   const performTelegramAuth = async (initData) =>
@@ -84,7 +88,7 @@ export const useAppStore = defineStore('app', () => {
       setToken(res?.token || getAuthToken());
       state.status = 'Авторизован через Telegram';
       await loadProfile();
-      await loadCourses();
+      await loadAllCourses();
     });
 
   const clearAuth = () => {
@@ -103,15 +107,29 @@ export const useAppStore = defineStore('app', () => {
       state.status = 'Профиль загружен';
     });
 
-  const loadCourses = async () =>
+  const loadProjects = async () =>
+    run('projects', async () => {
+      state.projects = await fetchProjects();
+      state.status = 'Проекты обновлены';
+    });
+
+  const loadAllCourses = async () =>
     run('courses', async () => {
       state.courses = await fetchCourses();
       state.status = 'Курсы обновлены';
     });
 
-  const openCourse = async (courseId) =>
+  const loadProjectCourses = async (projectId) =>
+    run(`project-${projectId}-courses`, async () => {
+      const courses = await fetchProjectCourses(projectId);
+      state.projectCourses[projectId] = courses;
+      state.status = 'Курсы проекта обновлены';
+      return courses;
+    });
+
+  const openCourse = async (projectId, courseId) =>
     run('course', async () => {
-      state.courseDetails = await fetchCourseById(courseId);
+      state.courseDetails = await fetchCourseById(projectId, courseId);
       state.paymentUrl = '';
       state.selectedLesson = null;
       state.lessonVideo = '';
@@ -119,10 +137,14 @@ export const useAppStore = defineStore('app', () => {
       return state.courseDetails;
     });
 
-  const ensureCourseLoaded = async (courseId) => {
+  const ensureCourseLoaded = async (projectId, courseId) => {
     const id = Number(courseId);
-    if (!state.courseDetails || Number(state.courseDetails.id) !== id) {
-      await openCourse(id);
+    if (
+      !state.courseDetails ||
+      Number(state.courseDetails.id) !== id ||
+      Number(state.courseDetails.project_id) !== Number(projectId)
+    ) {
+      await openCourse(projectId, id);
     }
   };
 
@@ -140,9 +162,9 @@ export const useAppStore = defineStore('app', () => {
       state.status = 'Ссылка на оплату получена';
     });
 
-  const openLesson = async (courseId, lessonId) =>
+  const openLesson = async (projectId, courseId, lessonId) =>
     run('lesson', async () => {
-      await ensureCourseLoaded(courseId);
+      await ensureCourseLoaded(projectId, courseId);
       const lesson =
         state.courseDetails?.lessons?.find((l) => String(l.id) === String(lessonId)) || null;
       state.selectedLesson = lesson;
@@ -162,7 +184,9 @@ export const useAppStore = defineStore('app', () => {
     handleDevLogin,
     performTelegramAuth,
     clearAuth,
-    loadCourses,
+    loadProjects,
+    loadAllCourses,
+    loadProjectCourses,
     loadMyCourses,
     openCourse,
     startPayment,

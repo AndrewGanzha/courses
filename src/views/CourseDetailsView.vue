@@ -1,15 +1,16 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useAppStore } from "../stores/appStore";
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useAppStore } from '../stores/appStore';
 
 const store = useAppStore();
 const route = useRoute();
 const router = useRouter();
 
-const courseId = computed(() => route.params.id);
+const projectId = computed(() => route.params.projectId);
+const courseId = computed(() => route.params.courseId);
 const paymentWindow = ref(null);
-const lastOpenedPaymentUrl = ref("");
+const lastOpenedPaymentUrl = ref('');
 
 const displayReviews = computed(() => {
   const lessons = store.state.courseDetails?.lessons || [];
@@ -32,26 +33,24 @@ const displayReviews = computed(() => {
 });
 
 const formatPrice = (value) =>
-  typeof value === "number"
-    ? `${new Intl.NumberFormat("ru-RU").format(value)} ₽`
-    : "—";
+  typeof value === 'number' ? `${new Intl.NumberFormat('ru-RU').format(value)} ₽` : '—';
 
 const loadCourse = async (id) => {
-  if (!id) return;
-  await store.openCourse(id);
+  if (!id || !projectId.value) return;
+  await store.openCourse(projectId.value, id);
 };
 
 const openLesson = (lesson) => {
   if (!lesson || lesson.placeholder || !lesson.has_video) return;
-  router.push(`/courses/${courseId.value}/lessons/${lesson.id}`);
+  router.push(`/projects/${projectId.value}/courses/${courseId.value}/lessons/${lesson.id}`);
 };
 
-const goBack = () => router.push("/");
+const goBack = () => router.push(`/projects/${projectId.value}`);
 
 const pay = async () => {
-  lastOpenedPaymentUrl.value = "";
+  lastOpenedPaymentUrl.value = '';
   try {
-    paymentWindow.value = window.open("about:blank", "_blank");
+    paymentWindow.value = window.open('about:blank', '_blank');
     if (paymentWindow.value) paymentWindow.value.opener = null;
   } catch {
     paymentWindow.value = null;
@@ -61,6 +60,7 @@ const pay = async () => {
 
 onMounted(() => loadCourse(courseId.value));
 watch(courseId, (id) => loadCourse(id));
+watch(projectId, () => loadCourse(courseId.value));
 
 watch(
   () => store.state.paymentUrl,
@@ -70,7 +70,7 @@ watch(
     if (paymentWindow.value && !paymentWindow.value.closed) {
       paymentWindow.value.location.href = url;
     } else {
-      window.open(url, "_blank", "noopener");
+      window.open(url, '_blank', 'noopener');
     }
   }
 );

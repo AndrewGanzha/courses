@@ -6,11 +6,22 @@ import { useAppStore } from '../stores/appStore';
 const store = useAppStore();
 const router = useRouter();
 
-const goToCourse = (id) => router.push(`/courses/${id}`);
+const hasProject = (id) => !!store.state.courses.find((c) => String(c.id) === String(id));
+
+const goToCourse = (id) => {
+  const course = store.state.courses.find((c) => String(c.id) === String(id));
+  const projectId = course?.project_id;
+  if (projectId) {
+    router.push(`/projects/${projectId}/courses/${id}`);
+  }
+};
 
 onMounted(async () => {
   if (!store.state.myCourses.length) {
     await store.loadMyCourses();
+  }
+  if (!store.state.courses.length && (store.useMocks || store.state.token)) {
+    await store.loadAllCourses();
   }
 });
 </script>
@@ -23,7 +34,7 @@ onMounted(async () => {
       <div
         v-for="course in store.state.myCourses"
         :key="course.id"
-        class="card course-card"
+        :class="['card course-card', { disabled: !hasProject(course.id) }]"
         @click="goToCourse(course.id)"
       >
         <div class="course-head">
@@ -37,3 +48,11 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.course-card.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+</style>

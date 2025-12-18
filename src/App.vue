@@ -8,7 +8,7 @@ const route = useRoute();
 const showAuthModal = ref(false);
 
 const navItems = [
-  { to: '/', label: 'Курсы' },
+  { to: '/', label: 'Проекты' },
   { to: '/my', label: 'Мои курсы' },
 ];
 

@@ -1,23 +1,23 @@
-const baseLessons = [
+const baseLessons = (courseTitle) => [
   {
     id: 1,
     title: 'Введение и стратегия',
-    description: 'Как устроена олимпиада и как распределять время.',
+    description: `Что внутри курса «${courseTitle}» и как работать с материалами.`,
   },
   {
     id: 2,
-    title: 'Методы решения',
-    description: 'Разбираем частые приёмы и ошибки.',
+    title: 'Основные модули',
+    description: 'Разбираем ключевые приёмы и ошибки.',
   },
   {
     id: 3,
-    title: 'Практика: задачи уровня 1',
+    title: 'Практика',
     description: 'Типовые задачи и решения.',
   },
   {
     id: 4,
-    title: 'Практика: задачи уровня 3',
-    description: 'Сложные задания с пояснениями.',
+    title: 'Сложные кейсы',
+    description: 'Разбор нетривиальных заданий.',
   },
 ];
 
@@ -26,38 +26,84 @@ const lessonVideoUrl =
 
 const now = () => new Date().toISOString();
 
-export const mockCourses = () => [
+export const mockProjects = () => [
   {
-    id: 101,
-    title: 'Ломоносов',
-    description: 'МГУ — профильная олимпиада',
-    price: 20000,
-    is_purchased: true,
+    id: 10,
+    title: 'Подготовка к олимпиадам',
+    image: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b',
   },
   {
-    id: 202,
-    title: 'РАНХиГС',
-    description: 'Экономика и обществознание',
-    price: 15000,
-    is_purchased: false,
+    id: 20,
+    title: 'Школьные курсы',
+    image: 'https://images.unsplash.com/photo-1588072432836-e10032774350',
   },
   {
-    id: 303,
-    title: 'СПбГУ',
-    description: 'Математика и логика',
-    price: 17000,
-    is_purchased: false,
+    id: 30,
+    title: 'Профориентация',
+    image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6',
   },
 ];
 
-export const mockCourseById = (courseId) => {
-  const courses = mockCourses();
-  const course = courses.find((c) => c.id === Number(courseId)) ?? courses[0];
+const coursesByProjectMap = {
+  10: [
+    {
+      id: 101,
+      project_id: 10,
+      title: 'Олимпиада Ломоносов',
+      description: 'Профильная олимпиада МГУ',
+      price: 20000,
+      is_purchased: true,
+      image: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b',
+    },
+    {
+      id: 102,
+      project_id: 10,
+      title: 'РАНХиГС',
+      description: 'Экономика и обществознание',
+      price: 15000,
+      is_purchased: false,
+      image: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b',
+    },
+  ],
+  20: [
+    {
+      id: 201,
+      project_id: 20,
+      title: 'Математика 10–11',
+      description: 'Подготовка к ЕГЭ профиль',
+      price: 12000,
+      is_purchased: false,
+      image: 'https://images.unsplash.com/photo-1588072432836-e10032774350',
+    },
+  ],
+  30: [
+    {
+      id: 301,
+      project_id: 30,
+      title: 'Карьерный трек',
+      description: 'Навигация по профессиям',
+      price: 9000,
+      is_purchased: false,
+      image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6',
+    },
+  ],
+};
+
+export const mockCoursesByProject = (projectId) => {
+  const idNum = projectId ? Number(projectId) : undefined;
+  if (idNum && coursesByProjectMap[idNum]) return coursesByProjectMap[idNum];
+
+  return Object.values(coursesByProjectMap).flat();
+};
+
+export const mockCourseById = (projectId, courseId) => {
+  const list = mockCoursesByProject(projectId);
+  const course = list.find((c) => c.id === Number(courseId)) ?? list[0];
   const isPurchased = course.is_purchased;
 
   return {
     ...course,
-    lessons: baseLessons.map((lesson) => ({
+    lessons: baseLessons(course.title).map((lesson) => ({
       ...lesson,
       has_video: isPurchased,
     })),
@@ -65,7 +111,8 @@ export const mockCourseById = (courseId) => {
 };
 
 export const mockMyCourses = () =>
-  mockCourses()
+  Object.values(coursesByProjectMap)
+    .flat()
     .filter((c) => c.is_purchased)
     .map((course) => ({
       ...course,

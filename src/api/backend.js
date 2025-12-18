@@ -9,11 +9,12 @@ import {
 } from './httpClient';
 import {
   mockCourseById,
-  mockCourses,
+  mockCoursesByProject,
   mockCreateCoursePayment,
   mockLessonVideo,
   mockMe,
   mockMyCourses,
+  mockProjects,
 } from './mocks';
 
 const USE_MOCKS = String(import.meta.env.VITE_USE_MOCKS ?? 'false').toLowerCase() === 'true';
@@ -60,11 +61,21 @@ export const logout = () => clearAuthToken();
 
 export const fetchMe = () => withMock(mockMe, () => apiGet('/me'));
 
-// Courses ---------------------------------------------------------
+// Projects / Courses ----------------------------------------------
 
-export const fetchCourses = () => withMock(mockCourses, () => apiGet('/courses'));
-export const fetchCourseById = (courseId) =>
-  withMock(() => mockCourseById(courseId), () => apiGet(`/courses/${courseId}`));
+export const fetchProjects = () => withMock(mockProjects, () => apiGet('/projects', { auth: false }));
+
+export const fetchCourses = () => withMock(mockCoursesByProject, () => apiGet('/courses'));
+export const fetchProjectCourses = (projectId) =>
+  withMock(() => mockCoursesByProject(projectId), () =>
+    apiGet(`/projects/${projectId}/courses`)
+  );
+
+export const fetchCourseById = (projectId, courseId) =>
+  withMock(() => mockCourseById(projectId, courseId), () =>
+    apiGet(`/projects/${projectId}/courses/${courseId}`)
+  );
+
 export const fetchMyCourses = () => withMock(mockMyCourses, () => apiGet('/my/courses'));
 
 // Lessons ---------------------------------------------------------

@@ -88,17 +88,39 @@ watch(projectId, () => loadCourses());
 </template>
 
 <style scoped>
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.course-card {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+}
+
 .course-thumb {
-  margin-top: 10px;
-  border-radius: 14px;
+  margin: 10px auto 0;
+  border-radius: 999px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .course-thumb img {
   display: block;
   width: 100%;
-  height: 160px;
+  height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 </style>

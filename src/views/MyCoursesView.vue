@@ -1,12 +1,13 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAppStore } from '../stores/appStore';
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useAppStore } from "../stores/appStore";
 
 const store = useAppStore();
 const router = useRouter();
 
-const hasProject = (id) => !!store.state.courses.find((c) => String(c.id) === String(id));
+const hasProject = (id) =>
+  !!store.state.courses.find((c) => String(c.id) === String(id));
 
 const goToCourse = (id) => {
   const course = store.state.courses.find((c) => String(c.id) === String(id));
@@ -29,7 +30,9 @@ onMounted(async () => {
 <template>
   <div class="card">
     <div class="section-title">Мои курсы</div>
-    <div v-if="!store.state.myCourses.length" class="empty">У вас пока нет купленных курсов</div>
+    <div v-if="!store.state.myCourses.length" class="empty">
+      У вас пока нет купленных курсов
+    </div>
     <div v-else class="cards">
       <div
         v-for="course in store.state.myCourses"
@@ -44,7 +47,9 @@ onMounted(async () => {
       </div>
     </div>
     <div class="controls">
-      <button class="btn btn-ghost" @click="router.push('/')">Назад к списку</button>
+      <button class="btn btn-ghost" @click="router.push('/')">
+        Назад к списку
+      </button>
     </div>
   </div>
 </template>
@@ -54,5 +59,9 @@ onMounted(async () => {
   opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.empty {
+  padding-bottom: 14px;
 }
 </style>

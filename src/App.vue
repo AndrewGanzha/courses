@@ -1,18 +1,12 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { RouterView } from 'vue-router';
+import AppFooter from './components/AppFooter.vue';
+import AppHeader from './components/AppHeader.vue';
 import { useAppStore } from './stores/appStore';
 
 const store = useAppStore();
-const route = useRoute();
 const showAuthModal = ref(false);
-
-const navItems = [
-  { to: '/', label: 'Проекты' },
-  { to: '/my', label: 'Мои курсы' },
-];
-
-const navClass = (to) => (route.path === to ? 'nav-link active' : 'nav-link');
 
 const openAuth = () => {
   showAuthModal.value = true;
@@ -36,21 +30,7 @@ onMounted(() => {
 
 <template>
   <div class="app">
-    <header>
-      <nav>
-        <RouterLink v-for="item in navItems" :key="item.to" :to="item.to" :class="navClass(item.to)">
-          {{ item.label }}
-        </RouterLink>
-      </nav>
-      <div class="user-actions">
-        <div v-if="store.state.user" class="user-pill">
-          {{ store.state.user.first_name || store.state.user.username || 'Пользователь' }}
-        </div>
-        <button v-else class="btn btn-ghost btn-small" :disabled="store.isLoading('auth')" @click="openAuth">
-          {{ store.isLoading('auth') ? 'Входим...' : 'Войти' }}
-        </button>
-      </div>
-    </header>
+    <AppHeader @open-auth="openAuth" />
 
     <div class="screen">
       <div v-if="store.state.error" class="alert alert-error">
@@ -59,6 +39,8 @@ onMounted(() => {
 
       <RouterView />
     </div>
+
+    <AppFooter />
 
     <div v-if="showAuthModal" class="modal" @click.self="closeAuth">
       <div class="modal-card">
@@ -110,58 +92,6 @@ body {
   overflow: hidden;
 }
 
-header {
-  padding: 16px;
-  background: linear-gradient(135deg, rgba(18, 12, 37, 0.85), rgba(18, 12, 37, 0.65));
-  border-bottom: 1px solid rgba(205, 186, 255, 0.2);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: space-between;
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
-}
-
-nav {
-  display: flex;
-  gap: 10px;
-}
-
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.user-pill {
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: rgba(205, 186, 255, 0.12);
-  border: 1px solid rgba(205, 186, 255, 0.25);
-  color: var(--color-text-primary);
-  font-weight: 700;
-}
-
-.nav-link {
-  color: var(--color-text-primary);
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: rgba(205, 186, 255, 0.12);
-  border: 1px solid rgba(205, 186, 255, 0.25);
-  transition: 0.25s ease;
-}
-
-.nav-link:hover {
-  border-color: rgba(205, 186, 255, 0.5);
-}
-
-.nav-link.active {
-  background: var(--color-accent);
-  color: #0b0617;
-  border-color: var(--color-accent);
-  box-shadow: 0 8px 24px var(--color-glow);
-}
-
 .screen {
   flex: 1;
   padding: 18px;
@@ -197,6 +127,58 @@ nav {
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 22px var(--color-glow);
+}
+
+.legal-card {
+  line-height: 1.6;
+}
+
+.legal-card h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.legal-card .lead {
+  color: var(--color-text-secondary);
+  margin: 0 0 12px;
+}
+
+.legal-card h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.legal-card p {
+  margin: 0 0 10px;
+  color: var(--color-text-secondary);
+}
+
+.legal-card a {
+  color: var(--color-accent-bright);
+}
+
+.legal-section {
+  margin-top: 14px;
+}
+
+.legal-card ul,
+.legal-card ol {
+  margin: 0 0 10px;
+  color: var(--color-text-secondary);
+  padding: 0 0 0 18px;
+}
+
+.data-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 4px;
+  display: grid;
+  gap: 6px;
+  color: var(--color-text-secondary);
+}
+
+.data-list strong {
+  color: var(--color-text-primary);
 }
 
 .meta-card .meta-row {
@@ -488,41 +470,6 @@ nav {
 @media (max-width: 600px) {
   .app {
     border-radius: 0;
-  }
-
-  header {
-    flex-wrap: nowrap;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .user-actions {
-    flex: 0 0 auto;
-  }
-
-  nav {
-    width: auto;
-    flex: 1 1 auto;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .nav-link {
-    white-space: nowrap;
-    padding: 7px 10px;
-    font-size: 14px;
-    border-radius: 11px;
-  }
-
-  .user-pill {
-    padding: 7px 10px;
-    border-radius: 11px;
-    font-size: 14px;
   }
 }
 </style>

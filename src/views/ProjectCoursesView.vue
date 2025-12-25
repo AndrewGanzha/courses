@@ -44,7 +44,7 @@ watch(projectId, () => loadCourses());
     </div>
     <div class="controls">
       <button class="btn btn-ghost" @click="router.push('/')">
-        Все проекты
+        Все олимпиады
       </button>
       <button class="btn btn-ghost" @click="router.push('/my')">
         Мои курсы

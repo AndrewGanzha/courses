@@ -21,7 +21,7 @@ onMounted(async () => {
 
 <template>
   <div class="card">
-    <div class="section-title">Проекты</div>
+    <div class="section-title">Олимпиады</div>
     <div class="controls">
       <button class="btn btn-ghost" @click="router.push('/my')">
         Мои курсы

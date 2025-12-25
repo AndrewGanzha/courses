@@ -9,7 +9,7 @@ const store = useAppStore();
 const route = useRoute();
 
 const navItems = [
-  { to: '/', label: 'Проекты' },
+  { to: '/', label: 'Олимпиады' },
   { to: '/my', label: 'Мои курсы' },
 ];
 

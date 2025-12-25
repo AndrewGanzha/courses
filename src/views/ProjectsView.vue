@@ -8,12 +8,12 @@ const store = useAppStore();
 const router = useRouter();
 
 const projects = computed(() => store.state.projects || []);
-const projectImage = (project) => project.image || placeholderImage;
+const projectImage = (project) => project?.image || placeholderImage;
 
 const openProject = (id) => router.push(`/projects/${id}`);
 
 onMounted(async () => {
-  if (!store.state.projects.length) {
+  if (!store.state.projects?.length) {
     await store.loadProjects();
   }
 });
@@ -22,19 +22,25 @@ onMounted(async () => {
 <template>
   <div class="card">
     <div class="section-title">Олимпиады</div>
+
     <div class="controls">
-      <button class="btn btn-ghost" @click="router.push('/my')">
+      <button class="btn btn-ghost" type="button" @click="router.push('/my')">
         Мои курсы
       </button>
     </div>
 
     <div v-if="!projects.length" class="empty">Пока нет проектов</div>
+
     <div v-else class="catalog-grid">
       <div
         v-for="project in projects"
         :key="project.id"
         class="catalog-card"
+        role="button"
+        tabindex="0"
         @click="openProject(project.id)"
+        @keydown.enter="openProject(project.id)"
+        @keydown.space.prevent="openProject(project.id)"
       >
         <div class="catalog-card__image">
           <img
@@ -42,8 +48,12 @@ onMounted(async () => {
             :alt="project.title"
             loading="lazy"
           />
-          <div class="catalog-card__badge">
-            <div class="catalog-card__title">{{ project.title }}</div>
+
+          <!-- ТРЕУГОЛЬНЫЙ БЕЙДЖ: делаем форму на самом элементе, без ::before -->
+          <div class="catalog-card__badge" aria-label="Название проекта">
+            <div class="catalog-card__title">
+              {{ project.title }}
+            </div>
           </div>
         </div>
       </div>
@@ -83,6 +93,11 @@ onMounted(async () => {
 .catalog-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4), 0 0 22px var(--color-glow);
+}
+
+.catalog-card:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
 }
 
 .catalog-card::after {
@@ -127,45 +142,76 @@ onMounted(async () => {
 }
 
 .catalog-card__badge {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  max-width: 82%;
-  padding: 10px 14px 12px 24px;
-  gap: 8px;
+  width: 100%;
+  height: 60%;
   position: absolute;
   right: 0;
   bottom: 0;
-  text-align: right;
-  overflow: hidden;
-}
+  z-index: 2;
 
-.catalog-card__badge::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  z-index: 0;
-}
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
 
-.catalog-card__badge > * {
-  position: relative;
-  z-index: 1;
+  padding: clamp(10px, 2.2vw, 14px) clamp(12px, 2.8vw, 18px)
+    clamp(12px, 2.6vw, 20px) clamp(30px, 6vw, 48px);
+
+  max-width: 82%;
+
+  background: linear-gradient(
+    145deg,
+    rgba(230, 230, 235, 0.38),
+    rgba(200, 200, 205, 0.32) 55%,
+    rgba(170, 170, 175, 0.36)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -18px 26px rgba(0, 0, 0, 0.25);
 }
 
 .catalog-card__title {
-  color: var(--color-text-primary);
   font-weight: 700;
-  line-height: 1.25;
-  word-break: break-word;
+  line-height: 1.2;
+  text-align: right;
+
+  font-size: clamp(12px, 2.6vw, 16px);
+
+  color: rgba(18, 18, 20, 0.95);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.45);
+
+  word-break: normal;
   overflow-wrap: anywhere;
+  hyphens: auto;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 3;
+}
+
+@media (max-width: 480px) {
+  .catalog-card__title {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.1;
+
+    text-shadow: none;
+    color: rgba(20, 20, 22, 0.85);
+
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 360px) {
+  .catalog-card__title {
+    font-size: 10.5px;
+    font-weight: 600;
+  }
 }
 </style>

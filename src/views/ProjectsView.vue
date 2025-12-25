@@ -36,17 +36,15 @@ onMounted(async () => {
         class="catalog-card"
         @click="openProject(project.id)"
       >
-        <div class="catalog-card__top">
-          <div class="catalog-card__icon-shell">
-            <img
-              :src="projectImage(project)"
-              :alt="project.title"
-              loading="lazy"
-            />
+        <div class="catalog-card__image">
+          <img
+            :src="projectImage(project)"
+            :alt="project.title"
+            loading="lazy"
+          />
+          <div class="catalog-card__badge">
+            <div class="catalog-card__title">{{ project.title }}</div>
           </div>
-        </div>
-        <div class="catalog-card__bottom">
-          <div class="catalog-card__title">{{ project.title }}</div>
         </div>
       </div>
     </div>
@@ -79,8 +77,7 @@ onMounted(async () => {
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   transition: 0.25s ease;
-  display: grid;
-  grid-template-rows: 1fr 1fr;
+  display: block;
 }
 
 .catalog-card:hover {
@@ -109,35 +106,16 @@ onMounted(async () => {
   opacity: 0.9;
 }
 
-.catalog-card__top {
+.catalog-card__image {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px 14px 6px;
-}
-
-.catalog-card__icon-shell {
-  position: relative;
-  width: 78%;
-  max-width: 180px;
+  width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
-  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -18px 26px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
 }
 
-.catalog-card__icon-shell img {
+.catalog-card__image img {
   position: relative;
   z-index: 1;
   display: block;
@@ -148,19 +126,46 @@ onMounted(async () => {
   border-radius: inherit;
 }
 
-.catalog-card__bottom {
+.catalog-card__badge {
   position: relative;
   z-index: 1;
-  padding: 10px 12px 14px;
-  text-align: center;
-  display: grid;
-  place-items: center;
-  isolation: isolate;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  max-width: 82%;
+  padding: 10px 14px 12px 24px;
+  gap: 8px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  text-align: right;
+  overflow: hidden;
+}
+
+.catalog-card__badge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  z-index: 0;
+}
+
+.catalog-card__badge > * {
+  position: relative;
+  z-index: 1;
 }
 
 .catalog-card__title {
   color: var(--color-text-primary);
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.25;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 </style>

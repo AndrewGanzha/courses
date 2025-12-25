@@ -143,7 +143,7 @@ onMounted(async () => {
 
 .catalog-card__badge {
   width: 100%;
-  height: 60%;
+  height: 45%;
   position: absolute;
   right: 0;
   bottom: 0;
@@ -158,20 +158,13 @@ onMounted(async () => {
 
   max-width: 82%;
 
-  background: linear-gradient(
-    145deg,
-    rgba(230, 230, 235, 0.38),
-    rgba(200, 200, 205, 0.32) 55%,
-    rgba(170, 170, 175, 0.36)
-  );
-
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 10, 12, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 
   clip-path: polygon(0 100%, 100% 0, 100% 100%);
 
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -18px 26px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .catalog-card__title {
@@ -181,8 +174,8 @@ onMounted(async () => {
 
   font-size: clamp(12px, 2.6vw, 16px);
 
-  color: rgba(18, 18, 20, 0.95);
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.45);
+  color: #f5f6ff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.32);
 
   word-break: normal;
   overflow-wrap: anywhere;
@@ -202,8 +195,7 @@ onMounted(async () => {
     line-height: 1.1;
 
     text-shadow: none;
-    color: rgba(20, 20, 22, 0.85);
-
+    letter-spacing: 0.2px;
     -webkit-line-clamp: 2;
   }
 }

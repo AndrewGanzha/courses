@@ -51,21 +51,27 @@ export const useAppStore = defineStore('app', () => {
 
   const readTelegramInitData = () => {
     if (typeof window === 'undefined') return '';
+    const clean = (value) => (typeof value === 'string' ? value.trim() : '');
+
+    // 1) Preferred: raw init data string from SDK (already serialized by Telegram)
     try {
       const raw = retrieveRawInitData();
-      if (raw) return raw.trim();
+      if (raw) return clean(raw);
     } catch (err) {
       console.warn('retrieveRawInitData failed, fallback to Telegram.WebApp', err);
     }
 
     const webApp = window.Telegram?.WebApp;
-    if (typeof webApp?.initData === 'string') {
-      return webApp.initData.trim();
+
+    // 2) Fallback: WebApp.initData (already serialized by Telegram)
+    if (webApp?.initData) {
+      return clean(webApp.initData);
     }
 
+    // 3) Fallback: serialize initDataUnsafe object to query string compatible with Telegram signature
     if (webApp?.initDataUnsafe) {
       try {
-        return serializeInitDataQuery(webApp.initDataUnsafe).trim();
+        return clean(serializeInitDataQuery(webApp.initDataUnsafe));
       } catch (err) {
         console.warn('serializeInitDataQuery failed', err);
       }

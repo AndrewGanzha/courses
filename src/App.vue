@@ -12,8 +12,8 @@ const needsTelegram = computed(
   () => !store.state.user && !store.state.telegramReady && !authLoading.value && !store.state.token
 );
 
-onMounted(() => {
-  store.init();
+onMounted(async () => {
+  await store.init();
   if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.ready();
   }

@@ -17,10 +17,6 @@ onMounted(async () => {
   if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.ready();
   }
-  // TODO: remove debug alert before production
-  if (store.state.telegramInitData) {
-    window.alert(`InitData отправляем на бэкенд:\n${store.state.telegramInitData}`);
-  }
 });
 </script>
 
@@ -275,7 +271,7 @@ body {
 }
 
 .pill {
-  padding: 2px 8px;
+  padding: 12px;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 700;

@@ -168,6 +168,10 @@ onMounted(async () => {
 }
 
 .catalog-card__title {
+  rotate: -30deg;
+  transform-origin: center right;
+  margin-right: -8px;
+  margin-bottom: 80px;
   font-weight: 700;
   line-height: 1.2;
   text-align: right;
@@ -188,7 +192,27 @@ onMounted(async () => {
   -webkit-line-clamp: 3;
 }
 
+@media (max-width: 768px) {
+  .catalog-card__title {
+    margin-bottom: 80px;
+  }
+
+  .catalog-card__title {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.1;
+
+    text-shadow: none;
+    letter-spacing: 0.2px;
+    -webkit-line-clamp: 2;
+  }
+}
+
 @media (max-width: 480px) {
+  .catalog-card__title {
+    margin-bottom: 40px;
+  }
+
   .catalog-card__title {
     font-size: 11px;
     font-weight: 600;

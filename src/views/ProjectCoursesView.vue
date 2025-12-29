@@ -80,18 +80,6 @@ watch(
 
 <template>
   <div class="card">
-    <div class="section-title">
-      {{ project?.title || "Проект" }}
-    </div>
-    <div class="controls">
-      <button class="btn btn-ghost" @click="router.push('/')">
-        Все олимпиады
-      </button>
-      <button class="btn btn-ghost" @click="router.push('/my')">
-        Мои курсы
-      </button>
-    </div>
-
     <div v-if="!courses.length" class="empty">
       Пока нет курсов в этом проекте
     </div>
@@ -113,15 +101,13 @@ watch(
           }}
         </div>
         <div class="course-desc">{{ course.description }}</div>
-        <div class="course-thumb">
-          <img :src="courseImage(course)" :alt="course.title" loading="lazy" />
-          <div v-if="!course.is_purchased" class="thumb-overlay">
-            <span class="lock-icon" aria-hidden="true"></span>
-          </div>
-        </div>
         <div class="course-meta">
           <span
-            :class="course.is_purchased ? 'pill pill-green' : 'pill pill-gray pill-wide'"
+            :class="
+              course.is_purchased
+                ? 'pill pill-green'
+                : 'pill pill-gray pill-wide'
+            "
           >
             {{ course.is_purchased ? "Доступ открыт" : "Не куплен" }}
           </span>
@@ -130,7 +116,12 @@ watch(
     </div>
   </div>
 
-  <div v-if="selectedCourse" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div
+    v-if="selectedCourse"
+    class="modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+  >
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title">Покупка курса</div>
@@ -139,13 +130,16 @@ watch(
       <div class="modal-body">
         <div class="purchase-title">{{ selectedCourse.title }}</div>
         <div class="purchase-desc">
-          {{ selectedCourse.description || "Получите доступ к курсу и урокам." }}
+          {{
+            selectedCourse.description || "Получите доступ к курсу и урокам."
+          }}
         </div>
         <div class="purchase-price">
           Цена:
           <b>{{
             typeof selectedCourse.price === "number"
-              ? new Intl.NumberFormat("ru-RU").format(selectedCourse.price) + " ₽"
+              ? new Intl.NumberFormat("ru-RU").format(selectedCourse.price) +
+                " ₽"
               : "—"
           }}</b>
         </div>
@@ -178,7 +172,7 @@ watch(
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  min-height: 240px;
+  min-height: 100px;
   display: flex;
   flex-direction: column;
   align-items: stretch;

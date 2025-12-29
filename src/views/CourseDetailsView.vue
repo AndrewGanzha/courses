@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '../stores/appStore';
 
@@ -9,8 +9,6 @@ const router = useRouter();
 
 const projectId = computed(() => route.params.projectId);
 const courseId = computed(() => route.params.courseId);
-const paymentWindow = ref(null);
-const lastOpenedPaymentUrl = ref('');
 
 const availableLessons = computed(() => {
   const lessons = store.state.courseDetails?.lessons || [];
@@ -35,33 +33,9 @@ const openLesson = (lesson) => {
 
 const goBack = () => router.push(`/projects/${projectId.value}`);
 
-const pay = async () => {
-  lastOpenedPaymentUrl.value = '';
-  try {
-    paymentWindow.value = window.open('about:blank', '_blank');
-    if (paymentWindow.value) paymentWindow.value.opener = null;
-  } catch {
-    paymentWindow.value = null;
-  }
-  await store.startPayment();
-};
-
 onMounted(() => loadCourse(courseId.value));
 watch(courseId, (id) => loadCourse(id));
 watch(projectId, () => loadCourse(courseId.value));
-
-watch(
-  () => store.state.paymentUrl,
-  (url) => {
-    if (!url || url === lastOpenedPaymentUrl.value) return;
-    lastOpenedPaymentUrl.value = url;
-    if (paymentWindow.value && !paymentWindow.value.closed) {
-      paymentWindow.value.location.href = url;
-    } else {
-      window.open(url, '_blank', 'noopener');
-    }
-  }
-);
 </script>
 
 <template>
@@ -88,18 +62,7 @@ watch(
     </div>
 
     <div class="controls">
-      <button
-        class="btn btn-primary"
-        :disabled="store.isLoading('payment')"
-        @click="pay"
-      >
-        {{
-          store.isLoading("payment")
-            ? "Оплатить..."
-            : "Оплатить"
-        }}
-      </button>
-      <button class="btn btn-ghost" @click="goBack">Назад к списку</button>
+      <button class="btn btn-ghost" style="margin-top: 20px" @click="goBack">Назад к списку</button>
     </div>
   </div>
 
@@ -117,7 +80,7 @@ watch(
         <div class="lesson-body">
           <div class="lesson-title">{{ lesson.displayTitle }}</div>
           <div class="lesson-meta">
-            <span class="pill pill-green">Видео доступно</span>
+            <span class="pill pill-green" style="margin-top: 10px">Видео доступно</span>
           </div>
         </div>
       </div>

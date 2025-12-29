@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "../stores/appStore";
 import placeholderImage from "../assets/images.png";
@@ -17,14 +17,42 @@ const courses = computed(
 );
 const courseImage = (course) => course.image || placeholderImage;
 
+const selectedCourse = ref(null);
+const paymentWindow = ref(null);
+const lastOpenedPaymentUrl = ref("");
+
 const loadCourses = async () => {
   if (projectId.value) {
     await store.loadProjectCourses(projectId.value);
   }
 };
 
-const openCourse = (courseId) => {
-  router.push(`/projects/${projectId.value}/courses/${courseId}`);
+const handleCourseClick = (course) => {
+  if (!course) return;
+  if (course.is_purchased) {
+    router.push(`/projects/${projectId.value}/courses/${course.id}`);
+    return;
+  }
+  selectedCourse.value = course;
+  lastOpenedPaymentUrl.value = "";
+};
+
+const closeModal = () => {
+  selectedCourse.value = null;
+  lastOpenedPaymentUrl.value = "";
+};
+
+const startPurchase = async () => {
+  if (!selectedCourse.value) return;
+  try {
+    paymentWindow.value = window.open("about:blank", "_blank");
+    if (paymentWindow.value) paymentWindow.value.opener = null;
+  } catch {
+    paymentWindow.value = null;
+  }
+
+  await store.openCourse(projectId.value, selectedCourse.value.id);
+  await store.startPayment();
 };
 
 onMounted(async () => {
@@ -35,6 +63,19 @@ onMounted(async () => {
 });
 
 watch(projectId, () => loadCourses());
+
+watch(
+  () => store.state.paymentUrl,
+  (url) => {
+    if (!url || url === lastOpenedPaymentUrl.value) return;
+    lastOpenedPaymentUrl.value = url;
+    if (paymentWindow.value && !paymentWindow.value.closed) {
+      paymentWindow.value.location.href = url;
+    } else {
+      window.open(url, "_blank", "noopener");
+    }
+  }
+);
 </script>
 
 <template>
@@ -59,7 +100,7 @@ watch(projectId, () => loadCourses());
         v-for="course in courses"
         :key="course.id"
         class="card course-card"
-        @click="openCourse(course.id)"
+        @click="handleCourseClick(course)"
       >
         <div class="course-head">
           <div class="course-title">{{ course.title }}</div>
@@ -82,6 +123,41 @@ watch(projectId, () => loadCourses());
             {{ course.is_purchased ? "Доступ открыт" : "Не куплен" }}
           </span>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="selectedCourse" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Покупка курса</div>
+        <button class="btn btn-ghost small" @click="closeModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="purchase-title">{{ selectedCourse.title }}</div>
+        <div class="purchase-desc">
+          {{ selectedCourse.description || "Получите доступ к курсу и урокам." }}
+        </div>
+        <div class="purchase-price">
+          Цена:
+          <b>{{
+            typeof selectedCourse.price === "number"
+              ? new Intl.NumberFormat("ru-RU").format(selectedCourse.price) + " ₽"
+              : "—"
+          }}</b>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button
+          class="btn btn-primary"
+          :disabled="store.isLoading('payment')"
+          @click="startPurchase"
+        >
+          {{ store.isLoading("payment") ? "Создаём ссылку..." : "Оплатить" }}
+        </button>
+        <button class="btn btn-ghost" type="button" @click="closeModal">
+          Отмена
+        </button>
       </div>
     </div>
   </div>
@@ -158,6 +234,71 @@ watch(projectId, () => loadCourses());
   width: 100%;
   justify-content: center;
   text-align: center;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.modal {
+  width: min(480px, 90vw);
+  background: rgba(26, 20, 40, 0.95);
+  border: 1px solid rgba(205, 186, 255, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 30px var(--color-glow);
+  padding: 18px;
+  color: var(--color-text-primary);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal-body {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.purchase-title {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.purchase-desc {
+  color: var(--color-text-secondary);
+}
+
+.purchase-price {
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn.small {
+  padding: 8px 12px;
 }
 
 @media (max-width: 640px) {

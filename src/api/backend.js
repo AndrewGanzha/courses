@@ -94,6 +94,13 @@ export const createCoursePayment = (courseId) =>
       })
   );
 
+// Tochka webhooks (dev/admin helpers) -----------------------------
+
+export const setupTochkaWebhook = () => apiGet('/setup-webhook', { auth: false });
+
+export const postTochkaWebhook = (payload) =>
+  apiPost('/payments/webhook/tochka', payload, { auth: false });
+
 // Expose low-level helpers for ad-hoc cases ----------------------
 
 export const http = {

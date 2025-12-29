@@ -1,92 +1,42 @@
-# courses
+# Courses frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Клиентская часть мини-приложения на Vue 3 + Vite, работающая с бекендом из папки `edu`.
 
-## Recommended IDE Setup
+## Установка и запуск
+- Установка зависимостей: `npm install`
+- Дев-сервер: `npm run dev`
+- Сборка: `npm run build`
+- Превью сборки: `npm run preview`
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Переменные окружения:
+- `VITE_API_BASE_URL` — базовый URL API (по умолчанию `http://localhost:8000/api`).
+- `VITE_USE_MOCKS` — `true`, чтобы подменить ответы моками (авторизация остаётся реальной).
 
-## Recommended Browser Setup
+Токен авторизации хранится в `localStorage` под ключом `auth_token` и автоматически подставляется в запросы.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## API-обёртки (`src/api/backend.js`)
+- Auth: `authWithTelegram(initData)` → POST `/auth/telegram`; `devLogin()` → POST `/dev/login`; `logout()` очищает токен.
+- Пользователь: `fetchMe()` → GET `/me`.
+- Проекты и курсы: `fetchProjects()` → GET `/projects` (публичный); `fetchCourses()` → GET `/courses` (под auth); `fetchProjectCourses(projectId)` → GET `/projects/{project}/courses`; `fetchCourseById(projectId, courseId)` → GET `/projects/{project}/courses/{course}`; `fetchLessonVideo(lessonId)` → GET `/lessons/{lesson}/video`; `fetchMyCourses()` → GET `/my/courses`.
+- Платежи: `createCoursePayment(courseId)` → POST `/payments/course`.
+- Tochka вебхуки (для отладки/админки): `setupTochkaWebhook()` → GET `/setup-webhook`; `postTochkaWebhook(payload)` → POST `/payments/webhook/tochka`.
+- Низкоуровневый клиент: `http.get/post/put/patch/delete` для кастомных запросов.
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-## Работа с бекендом
-
-В `src/api` добавлен общий слой для запросов к Laravel-бекенду.
-
-- `src/api/httpClient.js` — низкоуровневый клиент (fetch, заголовки, токен, обработка ошибок).
-- `src/api/backend.js` — готовые методы под эндпоинты: Telegram-авторизация, dev login, профайл, проекты, курсы проекта, уроки, платежи.
-- `src/api/index.js` — единый экспорт для импорта в компоненты/Pinia.
-
-### Настройки
-- Базовый URL берётся из `VITE_API_BASE_URL` (по умолчанию `http://localhost:8000/api`). Добавьте в `.env` при необходимости.
-- Токен хранится в `localStorage` под ключом `auth_token`.
-
-### Быстрый пример
-
+Пример использования:
 ```js
-import {
-  authWithTelegram,
-  fetchMe,
-  fetchProjects,
-  fetchProjectCourses,
-  createCoursePayment,
-  logout,
-} from './api';
+import { authWithTelegram, fetchProjects, fetchProjectCourses, createCoursePayment } from './api';
 
-await authWithTelegram(initDataFromTelegram); // токен сохранится автоматически
-const me = await fetchMe();
+await authWithTelegram(initDataFromTelegram);
 const projects = await fetchProjects();
 const courses = await fetchProjectCourses(projects[0].id);
 const payment = await createCoursePayment(courses[0].id);
-logout(); // удалить токен при выходе
 ```
 
-### Доступные методы
-- `authWithTelegram(initData)` — POST `/auth/telegram`, сохраняет токен.
-- `devLogin()` — POST `/dev/login`, сохраняет токен (оставлен только для локальной отладки).
-- `logout()` — удаляет токен.
-- `fetchMe()` — GET `/me`.
-- `fetchProjects()` — GET `/projects` (публично).
-- `fetchProjectCourses(projectId)` — GET `/projects/{project}/courses`.
-- `fetchCourseById(projectId, id)` — GET `/projects/{project}/courses/{id}`.
-- `fetchCourses()` — GET `/courses` (все курсы, под авторизацией).
-- `fetchMyCourses()` — GET `/my/courses`.
-- `fetchLessonVideo(lessonId)` — GET `/lessons/{id}/video`.
-- `createCoursePayment(courseId)` — POST `/payments/course`.
-- Низкоуровневый объект `http` (`get/post/put/patch/delete`) для редких кастомных запросов.
+## Интерфейс
+- Главная: список проектов → курсы проекта → детали курса с уроками и оплатой.
+- Отдельные экраны: просмотр урока, «Мои курсы», политика конфиденциальности, согласие, оферта, контакты.
+- Авторизация через Telegram mini app происходит автоматически, вне Telegram показывается подсказка открыть приложение из клиента.
 
-## Экран приложения (App.vue)
-- Главная — список проектов, внутри проекта — курсы, детальная страница курса с уроками и оплатой, «Мои курсы», просмотр видео урока.
-- Авторизация выполняется автоматически через Telegram mini app (`window.Telegram.WebApp.initData`); вне Telegram пользователь увидит подсказку открыть приложение из клиента Telegram.
-
-### Моки
-- Для всех запросов, кроме авторизации, есть мок-ответы (см. `src/api/mocks.js`).
-- Включение: `VITE_USE_MOCKS=true` (автоподмена данных, но авторизация остаётся реальной).
+## Моки
+- Ответы для проектов/курсов/уроков/платежей/профиля находятся в `src/api/mocks.js`.
+- Включение моков: `VITE_USE_MOCKS=true` (используются для всех методов, где есть заглушки; авторизация не мокается).

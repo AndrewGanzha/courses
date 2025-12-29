@@ -24,6 +24,8 @@ export const useAppStore = defineStore('app', () => {
     status: '',
 
     token: getAuthToken(),
+    telegramInitData: '',
+    telegramReady: false,
     user: null,
     projects: [],
     courses: [],
@@ -46,6 +48,11 @@ export const useAppStore = defineStore('app', () => {
     console.error(err);
   };
 
+  const readTelegramInitData = () => {
+    if (typeof window === 'undefined') return '';
+    return window.Telegram?.WebApp?.initData || '';
+  };
+
   const run = async (key, fn) => {
     state.loading[key] = true;
     state.error = '';
@@ -64,11 +71,23 @@ export const useAppStore = defineStore('app', () => {
   };
 
   const init = async () => {
+    state.telegramInitData = readTelegramInitData();
+    state.telegramReady = !!state.telegramInitData;
+
     await loadProjects();
+
     if (state.token) {
       await loadProfile();
       await loadAllCourses();
-    } else if (useMocks) {
+      return;
+    }
+
+    if (state.telegramInitData) {
+      await performTelegramAuth();
+      return;
+    }
+
+    if (useMocks) {
       await loadAllCourses();
     }
   };
@@ -84,7 +103,15 @@ export const useAppStore = defineStore('app', () => {
 
   const performTelegramAuth = async (initData) =>
     run('auth', async () => {
-      const res = await authWithTelegram(initData);
+      const payload = initData || state.telegramInitData || readTelegramInitData();
+      if (!payload) {
+        throw new Error('Авторизация доступна только внутри Telegram mini app.');
+      }
+
+      state.telegramInitData = payload;
+      state.telegramReady = true;
+
+      const res = await authWithTelegram(payload);
       setToken(res?.token || getAuthToken());
       state.status = 'Авторизован через Telegram';
       await loadProfile();

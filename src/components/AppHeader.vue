@@ -3,8 +3,6 @@ import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useAppStore } from '../stores/appStore';
 
-const emit = defineEmits(['open-auth']);
-
 const store = useAppStore();
 const route = useRoute();
 
@@ -18,10 +16,11 @@ const isAuthLoading = computed(() => store.isLoading('auth'));
 const userName = computed(
   () => store.state.user?.first_name || store.state.user?.username || 'Пользователь'
 );
-
-const openAuth = () => {
-  emit('open-auth');
-};
+const authHint = computed(() => {
+  if (isAuthLoading.value) return 'Подключаем Telegram...';
+  if (store.state.telegramReady) return 'Ждем авторизацию Telegram';
+  return 'Войдите через Telegram';
+});
 </script>
 
 <template>
@@ -32,12 +31,9 @@ const openAuth = () => {
       </RouterLink>
     </nav>
     <div class="user-actions">
-      <div v-if="store.state.user" class="user-pill">
-        {{ userName }}
+      <div :class="['user-pill', { 'user-pill--guest': !store.state.user }]">
+        {{ store.state.user ? userName : authHint }}
       </div>
-      <button v-else class="btn btn-ghost btn-small" :disabled="isAuthLoading" @click="openAuth">
-        {{ isAuthLoading ? 'Входим...' : 'Войти' }}
-      </button>
     </div>
   </header>
 </template>
@@ -72,6 +68,11 @@ const openAuth = () => {
   border: 1px solid rgba(205, 186, 255, 0.25);
   color: var(--color-text-primary);
   font-weight: 700;
+}
+
+.user-pill--guest {
+  color: var(--color-text-secondary);
+  border-style: dashed;
 }
 
 .nav-link {

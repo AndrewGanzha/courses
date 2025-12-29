@@ -1,69 +1,47 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { RouterView } from 'vue-router';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import { useAppStore } from './stores/appStore';
 
 const store = useAppStore();
-const showAuthModal = ref(false);
 
-const openAuth = () => {
-  showAuthModal.value = true;
-};
-
-const closeAuth = () => {
-  showAuthModal.value = false;
-};
-
-const loginAndClose = async () => {
-  await store.handleDevLogin();
-  if (!store.state.error) {
-    closeAuth();
-  }
-};
+const authLoading = computed(() => store.isLoading('auth'));
+const needsTelegram = computed(
+  () => !store.state.user && !store.state.telegramReady && !authLoading.value && !store.state.token
+);
 
 onMounted(() => {
   store.init();
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.ready();
+  }
 });
 </script>
 
 <template>
   <div class="app">
-    <AppHeader @open-auth="openAuth" />
+    <AppHeader />
 
     <div class="screen">
       <div v-if="store.state.error" class="alert alert-error">
         {{ store.state.error }}
       </div>
 
+      <div v-else-if="authLoading" class="notice">
+        Подключаем Telegram, проверяем права...
+      </div>
+
+      <div v-else-if="needsTelegram" class="notice">
+        Авторизация доступна только внутри Telegram mini app. Пожалуйста, откройте приложение через
+        Telegram, чтобы продолжить.
+      </div>
+
       <RouterView />
     </div>
 
     <AppFooter />
-
-    <div v-if="showAuthModal" class="modal" @click.self="closeAuth">
-      <div class="modal-card">
-        <div class="modal-header">
-          <div class="modal-title">Вход</div>
-          <button class="modal-close" @click="closeAuth">×</button>
-        </div>
-        <div class="modal-body">
-          <p class="modal-text">
-            Войдите, чтобы видеть свои курсы и оплачивать новые. Для теста используйте быструю авторизацию.
-          </p>
-          <div class="controls">
-            <button class="btn btn-primary" :disabled="store.isLoading('auth')" @click="loginAndClose">
-              {{ store.isLoading('auth') ? 'Входим...' : 'Быстрый вход' }}
-            </button>
-            <button class="btn btn-ghost" @click="closeAuth">Отмена</button>
-          </div>
-          <p class="hint">
-            В продакшене вызовите <code>performTelegramAuth(initData)</code> из мини-аппа, чтобы получить токен.
-          </p>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -412,59 +390,6 @@ body {
   background: rgba(247, 107, 138, 0.12);
   border-color: rgba(247, 107, 138, 0.3);
   color: #ffb3c5;
-}
-
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(5, 3, 11, 0.6);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 50;
-}
-
-.modal-card {
-  width: min(480px, 100%);
-  background: rgba(18, 12, 37, 0.95);
-  border: 1px solid rgba(205, 186, 255, 0.25);
-  border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 24px var(--color-glow);
-  padding: 18px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.modal-title {
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.modal-close {
-  background: transparent;
-  border: 1px solid rgba(205, 186, 255, 0.25);
-  color: var(--color-text-primary);
-  border-radius: 10px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-}
-
-.modal-body {
-  color: var(--color-text-secondary);
-}
-
-.modal-text {
-  margin-bottom: 14px;
-  line-height: 1.5;
 }
 
 @media (max-width: 600px) {

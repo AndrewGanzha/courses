@@ -18,7 +18,7 @@ const goToCourse = (id) => {
 };
 
 onMounted(async () => {
-  if (!store.state.myCourses.length) {
+  if (!store.state.myCourses.length && (store.state.token || store.useMocks)) {
     await store.loadMyCourses();
   }
   if (!store.state.courses.length && (store.useMocks || store.state.token)) {

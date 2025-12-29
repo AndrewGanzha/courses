@@ -17,6 +17,10 @@ onMounted(() => {
   if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.ready();
   }
+  // TODO: remove debug alert before production
+  if (store.state.telegramInitData) {
+    window.alert(`InitData отправляем на бэкенд:\n${store.state.telegramInitData}`);
+  }
 });
 </script>
 

@@ -9,6 +9,9 @@ const router = useRouter();
 
 const projectId = computed(() => route.params.projectId);
 const courseId = computed(() => route.params.courseId);
+const isInactive = computed(
+  () => store.state.courseDetails && store.state.courseDetails.is_active === false
+);
 
 const availableLessons = computed(() => {
   const lessons = store.state.courseDetails?.lessons || [];
@@ -68,22 +71,25 @@ watch(projectId, () => loadCourse(courseId.value));
 
   <div class="card">
     <div class="section-title">Разборы</div>
-    <div v-if="!availableLessons.length" class="empty">Пока нет опубликованных видео</div>
+    <div v-if="isInactive" class="empty">Скоро здесь появятся обучающие видео№</div>
     <template v-else>
-      <div
-        v-for="lesson in availableLessons"
-        :key="lesson.id"
-        class="lesson"
-        @click="openLesson(lesson)"
-      >
-        <div class="lesson-icon">🎬</div>
-        <div class="lesson-body">
-          <div class="lesson-title">{{ lesson.displayTitle }}</div>
-          <div class="lesson-meta">
-            <span class="pill pill-green" style="margin-top: 10px">Видео доступно</span>
+      <div v-if="!availableLessons.length" class="empty">Пока нет опубликованных видео</div>
+      <template v-else>
+        <div
+          v-for="lesson in availableLessons"
+          :key="lesson.id"
+          class="lesson"
+          @click="openLesson(lesson)"
+        >
+          <div class="lesson-icon">🎬</div>
+          <div class="lesson-body">
+            <div class="lesson-title">{{ lesson.displayTitle }}</div>
+            <div class="lesson-meta">
+              <span class="pill pill-green" style="margin-top: 10px">Видео доступно</span>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </template>
   </div>
 </template>

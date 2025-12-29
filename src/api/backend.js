@@ -35,6 +35,10 @@ export const authWithTelegram = async (initData) => {
     { initData },
     {
       auth: false,
+      headers: {
+        // Pass raw init data in Authorization header per TMA recommendation.
+        Authorization: `tma ${initData}`,
+      },
     }
   );
 

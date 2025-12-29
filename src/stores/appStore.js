@@ -52,14 +52,15 @@ export const useAppStore = defineStore('app', () => {
   const readTelegramInitData = () => {
     if (typeof window === 'undefined') return '';
     try {
-      const raw = retrieveRawInitData();
-      if (raw) return raw;
+        const raw = retrieveRawInitData();
+        if (raw) return raw.trim();
     } catch (err) {
       console.warn('retrieveRawInitData failed, fallback to Telegram.WebApp', err);
     }
 
     const webApp = window.Telegram?.WebApp;
-    return webApp?.initData || webApp?.initDataUnsafe || '';
+    const payload = webApp?.initData || webApp?.initDataUnsafe || '';
+    return typeof payload === 'string' ? payload.trim() : '';
   };
 
   const run = async (key, fn) => {
@@ -92,7 +93,7 @@ export const useAppStore = defineStore('app', () => {
     }
 
     if (state.telegramInitData) {
-      await performTelegramAuth();
+      await performTelegramAuth(state.telegramInitData);
       return;
     }
 

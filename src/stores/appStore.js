@@ -16,6 +16,7 @@ import {
   getAuthToken,
   logout,
 } from '../api';
+import { retrieveRawInitData } from '@tma.js/sdk-vue';
 
 export const useAppStore = defineStore('app', () => {
   const state = reactive({
@@ -50,7 +51,15 @@ export const useAppStore = defineStore('app', () => {
 
   const readTelegramInitData = () => {
     if (typeof window === 'undefined') return '';
-    return window.Telegram?.WebApp?.initData || '';
+    try {
+      const raw = retrieveRawInitData();
+      if (raw) return raw;
+    } catch (err) {
+      console.warn('retrieveRawInitData failed, fallback to Telegram.WebApp', err);
+    }
+
+    const webApp = window.Telegram?.WebApp;
+    return webApp?.initData || webApp?.initDataUnsafe || '';
   };
 
   const run = async (key, fn) => {
@@ -72,7 +81,7 @@ export const useAppStore = defineStore('app', () => {
 
   const init = async () => {
     state.telegramInitData = readTelegramInitData();
-    state.telegramReady = !!state.telegramInitData;
+    state.telegramReady = !!(state.telegramInitData || window.Telegram?.WebApp);
 
     await loadProjects();
 

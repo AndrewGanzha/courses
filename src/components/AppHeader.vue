@@ -59,6 +59,7 @@ const authHint = computed(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: 46%;
 }
 
 .user-pill {
@@ -68,6 +69,10 @@ const authHint = computed(() => {
   border: 1px solid rgba(205, 186, 255, 0.25);
   color: var(--color-text-primary);
   font-weight: 700;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-pill--guest {
@@ -125,7 +130,8 @@ const authHint = computed(() => {
   .user-pill {
     padding: 7px 10px;
     border-radius: 11px;
-    font-size: 14px;
+    font-size: 13px;
+    max-width: 60vw;
   }
 }
 </style>

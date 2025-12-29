@@ -115,6 +115,9 @@ watch(
         <div class="course-desc">{{ course.description }}</div>
         <div class="course-thumb">
           <img :src="courseImage(course)" :alt="course.title" loading="lazy" />
+          <div v-if="!course.is_purchased" class="thumb-overlay">
+            <span class="lock-icon" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="course-meta">
           <span
@@ -203,14 +206,15 @@ watch(
 
 .course-thumb {
   margin: 12px auto 0;
-  border-radius: 999px;
+  border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .course-thumb img {
@@ -218,7 +222,7 @@ watch(
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: 12px;
 }
 
 .course-meta {
@@ -234,6 +238,23 @@ watch(
   width: 100%;
   justify-content: center;
   text-align: center;
+}
+
+.thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.75));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.lock-icon {
+  width: 48px;
+  height: 48px;
+  background: url("/lock.svg") center/contain no-repeat;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
 }
 
 .modal-backdrop {
@@ -307,8 +328,8 @@ watch(
   }
 
   .course-thumb {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
   }
 }
 </style>

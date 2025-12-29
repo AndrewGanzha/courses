@@ -71,7 +71,7 @@ watch(projectId, () => loadCourse(courseId.value));
 
   <div class="card">
     <div class="section-title">Разборы</div>
-    <div v-if="isInactive" class="empty">Скоро здесь появятся обучающие видео№</div>
+    <div v-if="isInactive" class="empty">Скоро здесь появятся обучающие видео</div>
     <template v-else>
       <div v-if="!availableLessons.length" class="empty">Пока нет опубликованных видео</div>
       <template v-else>

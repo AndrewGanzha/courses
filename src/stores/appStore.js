@@ -16,7 +16,7 @@ import {
   getAuthToken,
   logout,
 } from '../api';
-import { retrieveRawInitData } from '@tma.js/sdk-vue';
+import { retrieveRawInitData, serializeInitDataQuery } from '@tma.js/sdk-vue';
 
 export const useAppStore = defineStore('app', () => {
   const state = reactive({
@@ -52,15 +52,26 @@ export const useAppStore = defineStore('app', () => {
   const readTelegramInitData = () => {
     if (typeof window === 'undefined') return '';
     try {
-        const raw = retrieveRawInitData();
-        if (raw) return raw.trim();
+      const raw = retrieveRawInitData();
+      if (raw) return raw.trim();
     } catch (err) {
       console.warn('retrieveRawInitData failed, fallback to Telegram.WebApp', err);
     }
 
     const webApp = window.Telegram?.WebApp;
-    const payload = webApp?.initData || webApp?.initDataUnsafe || '';
-    return typeof payload === 'string' ? payload.trim() : '';
+    if (typeof webApp?.initData === 'string') {
+      return webApp.initData.trim();
+    }
+
+    if (webApp?.initDataUnsafe) {
+      try {
+        return serializeInitDataQuery(webApp.initDataUnsafe).trim();
+      } catch (err) {
+        console.warn('serializeInitDataQuery failed', err);
+      }
+    }
+
+    return '';
   };
 
   const run = async (key, fn) => {

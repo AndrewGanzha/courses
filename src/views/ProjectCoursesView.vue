@@ -100,7 +100,6 @@ watch(
               : "—"
           }}
         </div>
-        <div class="course-desc">{{ course.description }}</div>
         <div class="course-meta">
           <span
             :class="

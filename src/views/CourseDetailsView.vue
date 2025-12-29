@@ -12,24 +12,12 @@ const courseId = computed(() => route.params.courseId);
 const paymentWindow = ref(null);
 const lastOpenedPaymentUrl = ref('');
 
-const displayReviews = computed(() => {
+const availableLessons = computed(() => {
   const lessons = store.state.courseDetails?.lessons || [];
-  const result = lessons.slice(0, 10).map((lesson, index) => ({
+  return lessons.filter((lesson) => lesson.has_video).map((lesson, index) => ({
     ...lesson,
-    displayTitle: `Разбор ${index + 1}`,
-    placeholder: false,
+    displayTitle: lesson.title || `Разбор ${index + 1}`,
   }));
-
-  for (let i = result.length; i < 10; i += 1) {
-    result.push({
-      id: `placeholder-${i + 1}`,
-      has_video: false,
-      displayTitle: `Разбор ${i + 1}`,
-      placeholder: true,
-    });
-  }
-
-  return result;
 });
 
 const formatPrice = (value) =>
@@ -41,7 +29,7 @@ const loadCourse = async (id) => {
 };
 
 const openLesson = (lesson) => {
-  if (!lesson || lesson.placeholder || !lesson.has_video) return;
+  if (!lesson || !lesson.has_video) return;
   router.push(`/projects/${projectId.value}/courses/${courseId.value}/lessons/${lesson.id}`);
 };
 
@@ -117,24 +105,22 @@ watch(
 
   <div class="card">
     <div class="section-title">Разборы</div>
-    <div
-      v-for="lesson in displayReviews"
-      :key="lesson.id"
-      class="lesson"
-      :class="{ disabled: !lesson.has_video }"
-      @click="openLesson(lesson)"
-    >
-      <div class="lesson-icon">🎬</div>
-      <div class="lesson-body">
-        <div class="lesson-title">{{ lesson.displayTitle }}</div>
-        <div class="lesson-meta">
-          <span
-            :class="lesson.has_video ? 'pill pill-green' : 'pill pill-gray'"
-          >
-            {{ lesson.has_video ? "Видео доступно" : "Нужно купить курс" }}
-          </span>
+    <div v-if="!availableLessons.length" class="empty">Пока нет опубликованных видео</div>
+    <template v-else>
+      <div
+        v-for="lesson in availableLessons"
+        :key="lesson.id"
+        class="lesson"
+        @click="openLesson(lesson)"
+      >
+        <div class="lesson-icon">🎬</div>
+        <div class="lesson-body">
+          <div class="lesson-title">{{ lesson.displayTitle }}</div>
+          <div class="lesson-meta">
+            <span class="pill pill-green">Видео доступно</span>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>

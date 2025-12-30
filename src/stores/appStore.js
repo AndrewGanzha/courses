@@ -135,6 +135,10 @@ export const useAppStore = defineStore('app', () => {
         throw new Error('Авторизация доступна только внутри Telegram mini app.');
       }
 
+      if (typeof window !== 'undefined') {
+        window.alert(`Отправляем в /auth/telegram:\n\n${payload}`);
+      }
+
       state.telegramInitData = payload;
       state.telegramReady = true;
 

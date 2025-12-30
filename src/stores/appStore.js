@@ -23,6 +23,7 @@ export const useAppStore = defineStore('app', () => {
     loading: {},
     error: '',
     status: '',
+    reauthInProgress: false,
 
     token: getAuthToken(),
     telegramInitData: '',
@@ -80,12 +81,45 @@ export const useAppStore = defineStore('app', () => {
     return '';
   };
 
-  const run = async (key, fn) => {
+  const handleUnauthorizedAndRetry = async (fn) => {
+    if (state.reauthInProgress) {
+      throw new Error('Повторная авторизация уже выполняется');
+    }
+
+    state.reauthInProgress = true;
+    try {
+      logout();
+      setToken(null);
+      state.user = null;
+      state.myCourses = [];
+      state.status = 'Переавторизация через Telegram...';
+
+      if (!(state.telegramInitData || window.Telegram?.WebApp)) {
+        throw new Error('Нет данных Telegram для повторной авторизации');
+      }
+
+      await performTelegramAuth(undefined, { skipReauth: true, suppressAlert: true });
+      return await fn();
+    } finally {
+      state.reauthInProgress = false;
+    }
+  };
+
+  const run = async (key, fn, { skipReauth } = {}) => {
     state.loading[key] = true;
     state.error = '';
     try {
       return await fn();
     } catch (err) {
+      if (!skipReauth && err?.status === 401) {
+        try {
+          return await handleUnauthorizedAndRetry(fn);
+        } catch (retryErr) {
+          setError(retryErr);
+          return null;
+        }
+      }
+
       setError(err);
       return null;
     } finally {
@@ -128,30 +162,34 @@ export const useAppStore = defineStore('app', () => {
       await loadAllCourses();
     });
 
-  const performTelegramAuth = async (initData) =>
-    run('auth', async () => {
-      const payload = initData || state.telegramInitData || readTelegramInitData();
-      if (!payload) {
-        throw new Error('Авторизация доступна только внутри Telegram mini app.');
-      }
+  const performTelegramAuth = async (initData, { skipReauth = false, suppressAlert = false } = {}) =>
+    run(
+      'auth',
+      async () => {
+        const payload = initData || state.telegramInitData || readTelegramInitData();
+        if (!payload) {
+          throw new Error('Авторизация доступна только внутри Telegram mini app.');
+        }
 
-      // Перед телеграм-авторизацией сбрасываем старый токен, чтобы гарантированно получить новый
-      logout();
-      setToken(null);
+        // Перед телеграм-авторизацией сбрасываем старый токен, чтобы гарантированно получить новый
+        logout();
+        setToken(null);
 
-      if (typeof window !== 'undefined') {
-        window.alert(`Отправляем в /auth/telegram:\n\n${payload}`);
-      }
+        if (!suppressAlert && typeof window !== 'undefined') {
+          window.alert(`Отправляем в /auth/telegram:\n\n${payload}`);
+        }
 
-      state.telegramInitData = payload;
-      state.telegramReady = true;
+        state.telegramInitData = payload;
+        state.telegramReady = true;
 
       const res = await authWithTelegram(payload);
-      setToken(res?.token || getAuthToken());
-      state.status = 'Авторизован через Telegram';
-      await loadProfile();
-      await loadAllCourses();
-    });
+        setToken(res?.token || getAuthToken());
+        state.status = 'Авторизован через Telegram';
+        await loadProfile();
+        await loadAllCourses();
+      },
+      { skipReauth }
+    );
 
   const clearAuth = () => {
     logout();

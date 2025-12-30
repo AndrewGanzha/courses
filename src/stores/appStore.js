@@ -135,6 +135,10 @@ export const useAppStore = defineStore('app', () => {
         throw new Error('Авторизация доступна только внутри Telegram mini app.');
       }
 
+      // Перед телеграм-авторизацией сбрасываем старый токен, чтобы гарантированно получить новый
+      logout();
+      setToken(null);
+
       if (typeof window !== 'undefined') {
         window.alert(`Отправляем в /auth/telegram:\n\n${payload}`);
       }

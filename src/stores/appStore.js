@@ -98,7 +98,7 @@ export const useAppStore = defineStore('app', () => {
         throw new Error('Нет данных Telegram для повторной авторизации');
       }
 
-      await performTelegramAuth(undefined, { skipReauth: true, suppressAlert: true });
+      await performTelegramAuth(undefined, { skipReauth: true });
       return await fn();
     } finally {
       state.reauthInProgress = false;
@@ -162,7 +162,7 @@ export const useAppStore = defineStore('app', () => {
       await loadAllCourses();
     });
 
-  const performTelegramAuth = async (initData, { skipReauth = false, suppressAlert = false } = {}) =>
+  const performTelegramAuth = async (initData, { skipReauth = false } = {}) =>
     run(
       'auth',
       async () => {
@@ -174,10 +174,6 @@ export const useAppStore = defineStore('app', () => {
         // Перед телеграм-авторизацией сбрасываем старый токен, чтобы гарантированно получить новый
         logout();
         setToken(null);
-
-        if (!suppressAlert && typeof window !== 'undefined') {
-          window.alert(`Отправляем в /auth/telegram:\n\n${payload}`);
-        }
 
         state.telegramInitData = payload;
         state.telegramReady = true;

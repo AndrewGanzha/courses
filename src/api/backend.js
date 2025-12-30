@@ -30,6 +30,20 @@ const withMock = async (mockFactory, apiCall) => {
 // Auth ------------------------------------------------------------
 
 export const authWithTelegram = async (initData) => {
+  if (typeof window !== 'undefined') {
+    const preview = {
+      url: '/auth/telegram',
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `tma ${initData}`,
+      },
+      body: { initData },
+    };
+    window.alert(`HTTP debug:\n${JSON.stringify(preview, null, 2)}`);
+  }
+
   const result = await apiPost(
     '/auth/telegram',
     { initData },

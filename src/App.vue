@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { RouterView } from 'vue-router';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
@@ -18,6 +18,18 @@ onMounted(async () => {
     window.Telegram.WebApp.ready();
   }
 });
+
+let telegramAlertShown = false;
+watch(
+  () => store.state.telegramInitData,
+  (val) => {
+    if (!telegramAlertShown && val && typeof window !== 'undefined') {
+      telegramAlertShown = true;
+      window.alert(`App.vue initData:\n\n${val}`);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
